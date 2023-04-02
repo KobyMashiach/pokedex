@@ -1,23 +1,52 @@
-import 'package:compile_project/pages/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:compile_project/constants/color_constants.dart';
+import 'package:compile_project/presentation/injector.dart';
+import 'package:compile_project/presentation/pages/home/home_screen.dart';
+import 'package:compile_project/presentation/pages/pokemon_detail/pokemon_detail_screen.dart';
+import 'package:compile_project/presentation/pages/splash/splash_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Injector.init();
+  runApp(const ProviderScope(
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      title: 'Pokedex',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 153, 3, 3)),
-        useMaterial3: true,
+        sliderTheme: SliderTheme.of(context).copyWith(
+          trackHeight: 4,
+          thumbShape: SliderComponentShape.noThumb,
+          overlayShape: SliderComponentShape.noThumb,
+        ),
+        // fontFamily: 'NotoSans-Regular',
+        primaryColor: Color.fromARGB(255, 168, 18, 18),
       ),
-      home: const HomePage(),
+      home: const SplashScreen(),
+      onGenerateRoute: (RouteSettings settings) {
+        if (settings.name == 'pokemonDetail') {
+          final Map<String, dynamic> value =
+              settings.arguments as Map<String, dynamic>; // Retrieve the value.
+          return MaterialPageRoute(
+            builder: (_) => PokemonDetailScreen(
+              pokemonDetailEntity: value['detail'],
+            ),
+          ); // Pass it to BarPage.
+        }
+        return null;
+      },
+      routes: {
+        '/home': (context) => const HomeScreen(),
+      },
     );
   }
 }
