@@ -22,7 +22,7 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
   String _searchInList = '';
   bool searchInPage = false;
   late TextEditingController _searchAllPokemonsController;
-  late List<PokemonDetailEntity> pokemonList;
+  List<PokemonDetailEntity> pokemonList = [];
 
   Future<void> getAllPokemon() async {
     pokemonList = [];
