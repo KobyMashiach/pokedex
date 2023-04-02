@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:compile_project/domain/entities/pokemon_detail_entity.dart';
 import 'package:compile_project/presentation/pages/home/home_screen_controller.dart';
 import 'package:compile_project/presentation/widgets/pokemon_widget.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+
 import 'package:http/http.dart' as http;
 
 class SelectedPokemos extends ConsumerStatefulWidget {
@@ -22,7 +22,7 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
   String _searchInList = '';
   bool searchInPage = false;
   late TextEditingController _searchAllPokemonsController;
-  late List<dynamic> pokemonList;
+  late List<PokemonDetailEntity> pokemonList;
 
   Future<void> getAllPokemon() async {
     pokemonList = [];
@@ -32,17 +32,47 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
       var response = await http.get(Uri.parse(nextUrl));
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        pokemonList.addAll(data['results']);
+        for (var pokemonData in data['results']) {
+          var pokemonResponse = await http.get(Uri.parse(pokemonData['url']));
+          if (pokemonResponse.statusCode == 200) {
+            var pokemonDetails = jsonDecode(pokemonResponse.body);
+            var pokemon = PokemonDetailEntity(
+              id: pokemonDetails['id'],
+              name: pokemonDetails['name'],
+              speciesTypes: [
+                pokemonDetails['species']['name'],
+                ...pokemonDetails['types']
+                    .map((type) => type['type']['name'])
+                    .toList(),
+              ],
+              imageUrl: pokemonDetails['sprites']['front_default'],
+              height: pokemonDetails['height'],
+              weight: pokemonDetails['weight'],
+              bmi: calculateBMI(
+                  pokemonDetails['height'], pokemonDetails['weight']),
+              isFavourite: false,
+            );
+            pokemonList.add(pokemon);
+          } else {
+            print('Request failed with status: ${pokemonResponse.statusCode}.');
+          }
+        }
         if (data['next'] == null) {
           nextExists = false;
         } else {
-          nextUrl = data['next'];
+          // nextUrl = data['next'];
+          nextExists = false;
         }
       } else {
         print('Request failed with status: ${response.statusCode}.');
         return;
       }
     }
+    print(pokemonList.toString());
+  }
+
+  double calculateBMI(int height, int weight) {
+    return weight / ((height / 100) * (height / 100));
   }
 
   @override
@@ -120,69 +150,80 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
         return pokemon.name.contains(_searchTerm);
       }).toList();
 
-      return Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            setState(() {
-              searchInPage = !searchInPage;
-              _searchController.clear();
-            });
-          },
-          icon: !searchInPage
-              ? Icon(
-                  Icons.search,
-                )
-              : Icon(Icons.search_off),
-          label:
-              !searchInPage ? Text("חפש בפוקימונים שלך") : Text("צא מהחיפוש"),
-        ),
-        body: Column(
-          children: [
-            _searchInAllPokemons(),
-            _buildSearchBox(),
-            FutureBuilder(
-                future: getAllPokemon(),
-                builder: (context, snapshot) {
-                  return snapshot.connectionState == ConnectionState.waiting
-                      ? const Center(
-                          child: Column(
-                          children: [
-                            Text('טוען פוקימונים'),
-                            SizedBox(height: 20),
-                            CircularProgressIndicator(),
-                          ],
-                        ))
-                      : Expanded(
-                          child: filteredMyPokemons.isEmpty
-                              ? const Center(
-                                  child:
-                                      Text('לא הוספת פוקימונים, נא חפש חדשים'),
-                                )
-                              : GridView.builder(
-                                  key: const PageStorageKey('all_pokemons'),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 12),
-                                  gridDelegate:
-                                      const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisSpacing: 10,
-                                    mainAxisSpacing: 12,
-                                    crossAxisCount: 2,
-                                    mainAxisExtent: 186,
-                                  ),
-                                  itemCount: filteredMyPokemons.length,
-                                  itemBuilder: (context, index) =>
-                                      PokemonWidget(
-                                    pokemonDetail: filteredMyPokemons[index],
-                                    onTap: () => _onTapPokemon(
-                                        filteredMyPokemons[index]),
-                                  ),
+      List<PokemonDetailEntity> filteredAllPokemons =
+          pokemonList.where((pokemon) {
+        return pokemon.name.contains(_searchInList);
+      }).toList();
+
+      return FutureBuilder(
+          future: getAllPokemon(),
+          builder: (context, snapshot) => snapshot.connectionState ==
+                      ConnectionState.waiting &&
+                  snapshot.hasData
+              ? const Center(
+                  child: Column(
+                  children: [
+                    Text('טוען פוקימונים'),
+                    SizedBox(height: 20),
+                    CircularProgressIndicator(),
+                  ],
+                ))
+              : Scaffold(
+                  floatingActionButtonLocation:
+                      FloatingActionButtonLocation.endFloat,
+                  floatingActionButton: FloatingActionButton.extended(
+                    onPressed: () {
+                      setState(() {
+                        searchInPage = !searchInPage;
+                        _searchController.clear();
+                      });
+                    },
+                    icon: !searchInPage
+                        ? const Icon(
+                            Icons.search,
+                          )
+                        : const Icon(Icons.search_off),
+                    label: !searchInPage
+                        ? Text("חפש בפוקימונים שלך")
+                        : Text("צא מהחיפוש"),
+                  ),
+                  body: Column(
+                    children: [
+                      _searchInAllPokemons(),
+                      _buildSearchBox(),
+                      Expanded(
+                        child: filteredMyPokemons.isEmpty
+                            ? const Center(
+                                child: Text('לא הוספת פוקימונים, נא חפש חדשים'),
+                              )
+                            : GridView.builder(
+                                key: const PageStorageKey('all_pokemons'),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 12),
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisSpacing: 10,
+                                  mainAxisSpacing: 12,
+                                  crossAxisCount: 2,
+                                  mainAxisExtent: 186,
                                 ),
-                        );
-                }),
-          ],
-        ),
-      );
+                                itemCount: _searchInList.length < 2
+                                    ? filteredMyPokemons.length
+                                    : filteredAllPokemons.length,
+                                itemBuilder: (context, index) => PokemonWidget(
+                                  pokemonDetail: _searchInList.length < 2
+                                      ? filteredMyPokemons[index]
+                                      : filteredAllPokemons[index],
+                                  onTap: () => _onTapPokemon(
+                                      _searchInList.length < 2
+                                          ? filteredMyPokemons[index]
+                                          : filteredAllPokemons[index]),
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
+                ));
     });
   }
 }
