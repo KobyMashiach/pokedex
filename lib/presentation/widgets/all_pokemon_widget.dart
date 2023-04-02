@@ -75,7 +75,7 @@ class _AllPokemonWidgetState extends ConsumerState<AllPokemonWidget> {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 10,
         mainAxisSpacing: 12,
-        crossAxisCount: 3,
+        crossAxisCount: 2,
         mainAxisExtent: 186,
       ),
       builderDelegate: PagedChildBuilderDelegate<PokemonDetailEntity>(
