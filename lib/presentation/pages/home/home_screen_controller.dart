@@ -15,7 +15,7 @@ final loaderStateProvider = StateProvider<bool>((ref) => false);
 final pokemonListProvider =
     StateProvider<List<PokemonDetailEntity>>((ref) => []);
 
-final favouriteListProvider =
+final myPokemonsListProvider =
     StateProvider<List<PokemonDetailEntity>>((ref) => []);
 
 final homeScreenControllerProvider =
@@ -103,7 +103,7 @@ class HomeScreenController {
           pokemonDetailList.add(detail);
         }
       }
-      ref.read(favouriteListProvider.notifier).state = pokemonDetailList;
+      ref.read(myPokemonsListProvider.notifier).state = pokemonDetailList;
       return pokemonDetailList;
     } catch (e) {
       rethrow;

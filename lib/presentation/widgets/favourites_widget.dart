@@ -15,17 +15,21 @@ class SelectedPokemos extends ConsumerStatefulWidget {
 class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
   late TextEditingController _searchController;
   String _searchTerm = '';
+  String _searchInList = '';
   bool searchInPage = false;
+  late TextEditingController _searchAllPokemonsController;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
+    _searchAllPokemonsController = TextEditingController();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchAllPokemonsController.dispose();
     super.dispose();
   }
 
@@ -52,12 +56,42 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
         : const SizedBox();
   }
 
+  Widget _searchInAllPokemons() {
+    return Container(
+      color: const Color.fromARGB(255, 114, 0, 0),
+      child: TextField(
+        style: TextStyle(color: Colors.white),
+        controller: _searchAllPokemonsController,
+        onChanged: (value) {
+          setState(() {
+            _searchInList = value;
+          });
+        },
+        decoration: const InputDecoration(
+          hintText: 'הוסף פוקימון מהרשימה',
+          hintStyle: TextStyle(color: Color.fromARGB(255, 197, 197, 197)),
+          fillColor: Colors.white,
+          border: OutlineInputBorder(),
+          icon: Icon(
+            Icons.manage_search_outlined,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    setState(() {
+      !searchInPage ? _searchTerm = "" : null;
+    });
+
     return Consumer(builder: (context, ref, child) {
-      List<PokemonDetailEntity> favourites = ref.watch(favouriteListProvider);
-      List<PokemonDetailEntity> filteredFavourites =
-          favourites.where((pokemon) {
+      List<PokemonDetailEntity> myPokemons = ref.watch(myPokemonsListProvider);
+
+      List<PokemonDetailEntity> filteredMyPokemons =
+          myPokemons.where((pokemon) {
         return pokemon.name.contains(_searchTerm);
       }).toList();
 
@@ -67,6 +101,7 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
           onPressed: () {
             setState(() {
               searchInPage = !searchInPage;
+              _searchController.clear();
             });
           },
           icon: !searchInPage
@@ -79,9 +114,10 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
         ),
         body: Column(
           children: [
+            _searchInAllPokemons(),
             _buildSearchBox(),
             Expanded(
-              child: filteredFavourites.isEmpty
+              child: filteredMyPokemons.isEmpty
                   ? const Center(
                       child: Text('לא הוספת פוקימונים, נא חפש חדשים'),
                     )
@@ -96,10 +132,10 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
                         crossAxisCount: 2,
                         mainAxisExtent: 186,
                       ),
-                      itemCount: filteredFavourites.length,
+                      itemCount: filteredMyPokemons.length,
                       itemBuilder: (context, index) => PokemonWidget(
-                        pokemonDetail: filteredFavourites[index],
-                        onTap: () => _onTapPokemon(filteredFavourites[index]),
+                        pokemonDetail: filteredMyPokemons[index],
+                        onTap: () => _onTapPokemon(filteredMyPokemons[index]),
                       ),
                     ),
             ),

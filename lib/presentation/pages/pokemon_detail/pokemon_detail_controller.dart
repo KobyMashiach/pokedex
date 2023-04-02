@@ -53,15 +53,15 @@ class PokemonDetailController {
   PokemonDetailController._internal();
 
   void removeFromList(PokemonDetailEntity pokemon) {
-    List<PokemonDetailEntity> favourites = ref.read(favouriteListProvider);
+    List<PokemonDetailEntity> favourites = ref.read(myPokemonsListProvider);
     favourites.remove(pokemon);
-    ref.read(favouriteListProvider.notifier).state = [...favourites];
+    ref.read(myPokemonsListProvider.notifier).state = [...favourites];
   }
 
   void addToList(PokemonDetailEntity pokemon) {
-    List<PokemonDetailEntity> favourites = ref.read(favouriteListProvider);
+    List<PokemonDetailEntity> favourites = ref.read(myPokemonsListProvider);
     favourites.add(pokemon);
-    ref.read(favouriteListProvider.notifier).state = [...favourites];
+    ref.read(myPokemonsListProvider.notifier).state = [...favourites];
   }
 
   Future<void> markAsFavourite(PokemonDetailEntity pokemon) async {
