@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:compile_project/domain/entities/pokemon_detail_entity.dart';
 import 'package:compile_project/presentation/pages/home/home_screen_controller.dart';
 import 'package:compile_project/presentation/widgets/pokemon_widget.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 class SelectedPokemos extends ConsumerStatefulWidget {
   const SelectedPokemos({Key? key}) : super(key: key);
@@ -18,12 +19,46 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
   String _searchInList = '';
   bool searchInPage = false;
   late TextEditingController _searchAllPokemonsController;
+  List<PokemonDetailEntity> newItems = [];
+  List<PokemonDetailEntity> cachedPokemons = [];
+  PagingController<int, PokemonDetailEntity> _pagingController =
+      PagingController<int, PokemonDetailEntity>(firstPageKey: 0);
+  int pageLimit = 20;
+
+  Future<void> _fetchPage(int pageKey) async {
+    try {
+      newItems = await ref.read(homeScreenControllerProvider).getPokemons();
+      final isLastPage = newItems.length < pageLimit;
+      if (isLastPage) {
+        _pagingController.appendLastPage(newItems);
+      } else {
+        final nextPageKey = pageKey + 1;
+        _pagingController.appendPage(newItems, nextPageKey);
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
+  }
+
+  Future<void> init() async {
+    if (mounted) {
+      cachedPokemons = ref.read(pokemonListProvider.notifier).state;
+      if (cachedPokemons.isNotEmpty) {
+        _pagingController.itemList = cachedPokemons;
+      }
+
+      _pagingController.addPageRequestListener((pageKey) async {
+        await _fetchPage(pageKey);
+      });
+    }
+  }
 
   @override
   void initState() {
-    super.initState();
     _searchController = TextEditingController();
     _searchAllPokemonsController = TextEditingController();
+    init();
+    super.initState();
   }
 
   @override
@@ -89,7 +124,6 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
 
     return Consumer(builder: (context, ref, child) {
       List<PokemonDetailEntity> myPokemons = ref.watch(myPokemonsListProvider);
-
       List<PokemonDetailEntity> filteredMyPokemons =
           myPokemons.where((pokemon) {
         return pokemon.name.contains(_searchTerm);
@@ -114,6 +148,9 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
         ),
         body: Column(
           children: [
+            Text(newItems.length.toString()),
+            Text(cachedPokemons.length.toString()),
+            Text(myPokemons.length.toString()),
             _searchInAllPokemons(),
             _buildSearchBox(),
             Expanded(
@@ -122,7 +159,7 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
                       child: Text('לא הוספת פוקימונים, נא חפש חדשים'),
                     )
                   : GridView.builder(
-                      key: const PageStorageKey('my_pokemons'),
+                      key: const PageStorageKey('all_pokemons'),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 12),
                       gridDelegate:

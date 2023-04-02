@@ -84,7 +84,7 @@ class _AllPokemonWidgetState extends ConsumerState<AllPokemonWidget> {
         firstPageProgressIndicatorBuilder: (context) => Wrap(
           runSpacing: 12,
           spacing: 10,
-          children: List.generate(20, (index) => index)
+          children: List.generate(pageLimit, (index) => index)
               .map((i) => const PokemonShimmerWidget())
               .toList(),
         ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:compile_project/constants/color_constants.dart';
 import 'package:compile_project/domain/entities/pokemon_detail_entity.dart';
 import 'package:compile_project/utils/utils.dart';
 
@@ -25,6 +24,14 @@ class PokemonWidget extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Text(
+                Utils.capitalize(pokemonDetail.name.toString()),
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               Container(
                 width: (MediaQuery.of(context).size.width - 40) / 3,
                 color: Colors.green[50],
@@ -42,36 +49,17 @@ class PokemonWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      pokemonDetail.id.formatId(),
-                      style: const TextStyle(
-                        color: ColorConstants.grey,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 2,
-                    ),
-                    Text(
-                      Utils.capitalize(pokemonDetail.name.toString()),
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                     const SizedBox(
                       height: 10,
                     ),
-                    Text(
-                      pokemonDetail.speciesTypes
-                          .map((t) => Utils.capitalize(t))
-                          .join(', '),
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: ColorConstants.grey,
-                      ),
+                    Row(
+                      children: [
+                        Text(pokemonDetail.speciesTypes[0]),
+                        Spacer(),
+                        Text(
+                          pokemonDetail.weight.toString(),
+                        )
+                      ],
                     )
                   ],
                 ),

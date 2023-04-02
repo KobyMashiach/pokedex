@@ -4,8 +4,6 @@ import 'package:compile_project/constants/color_constants.dart';
 import 'package:compile_project/domain/entities/pokemon_detail_entity.dart';
 import 'package:compile_project/presentation/pages/pokemon_detail/pokemon_detail_controller.dart';
 import 'package:compile_project/presentation/widgets/pokemon_detail_header.dart';
-import 'package:compile_project/presentation/widgets/pokemon_shape_info.dart';
-import 'package:compile_project/presentation/widgets/pokemon_stat_widget.dart';
 
 class PokemonDetailScreen extends ConsumerStatefulWidget {
   final PokemonDetailEntity pokemonDetailEntity;
@@ -31,20 +29,20 @@ class _PokemonDetailScreenState extends ConsumerState<PokemonDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
       floatingActionButton: Consumer(
         builder: (context, ref, child) {
           bool isFavourite = ref.watch(pokemonStateProvider);
           return FloatingActionButton.extended(
             label: Text(
-              isFavourite ? 'Remove from favourites' : 'Mark as favourite',
+              isFavourite ? 'הסר מהפוקימונים שלי' : 'הוסף לפוקימונים שלי',
               style: TextStyle(
-                  color:
-                      isFavourite ? ColorConstants.primaryBlue : Colors.white),
+                  color: isFavourite
+                      ? Color.fromARGB(255, 255, 255, 255)
+                      : Color.fromARGB(255, 0, 0, 0)),
             ),
             backgroundColor: isFavourite
-                ? ColorConstants.lightBlue
-                : ColorConstants.primaryBlue,
+                ? Color.fromARGB(255, 158, 13, 13)
+                : Color.fromARGB(255, 255, 147, 147),
             onPressed: () async {
               if (!isFavourite) {
                 await ref
@@ -72,13 +70,13 @@ class _PokemonDetailScreenState extends ConsumerState<PokemonDetailScreen> {
           SliverList(
             delegate: SliverChildListDelegate(
               [
-                PokemonDetailHeader(
+                PokemonDetailDisplay(
                     pokemonDetailEntity: widget.pokemonDetailEntity),
-                PokemonShapeInfo(
-                    pokemonDetailEntity: widget.pokemonDetailEntity),
-                PokemonStatWidget(
-                  pokemonDetailEntity: widget.pokemonDetailEntity,
-                )
+                // PokemonShapeInfo(
+                //     pokemonDetailEntity: widget.pokemonDetailEntity),
+                // PokemonStatWidget(
+                //   pokemonDetailEntity: widget.pokemonDetailEntity,
+                // )
               ],
             ),
           ),

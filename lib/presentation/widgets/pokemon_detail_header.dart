@@ -3,78 +3,91 @@ import 'package:compile_project/constants/image_constants.dart';
 import 'package:compile_project/domain/entities/pokemon_detail_entity.dart';
 import 'package:compile_project/utils/utils.dart';
 
-class PokemonDetailHeader extends StatelessWidget {
+class PokemonDetailDisplay extends StatelessWidget {
   final PokemonDetailEntity pokemonDetailEntity;
-  const PokemonDetailHeader({
+  const PokemonDetailDisplay({
     Key? key,
     required this.pokemonDetailEntity,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 200,
-      color: Colors.green[50],
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: MainAxisSize.max,
+    return Column(
+      children: [
+        Text(
+          pokemonDetailEntity.name,
+          style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+        ),
+        Image.network(pokemonDetailEntity.imageUrl),
+        detailsText(
+            title: "National No", detail: pokemonDetailEntity.id.toString()),
+        detailsText(
+          title: "Type",
+          detail: pokemonDetailEntity.speciesTypes[0].toUpperCase(),
+          color: getTypeColor(pokemonDetailEntity.speciesTypes[0]),
+        ),
+        detailsText(
+            title: "Height",
+            detail:
+                "${pokemonDetailEntity.height / 10} m (${(pokemonDetailEntity.height / 10 * 3.28).round()}'00'')"),
+        detailsText(
+            title: "Weight",
+            detail:
+                "${pokemonDetailEntity.weight / 10} kg (${(pokemonDetailEntity.weight / 10 * 2.204).toStringAsFixed(1)} ibs)"),
+      ],
+    );
+  }
+
+  Color getTypeColor(String type) {
+    switch (type) {
+      case "fire":
+        return Colors.red;
+      case "grass":
+        return Colors.green;
+      case "Water":
+        return const Color.fromARGB(255, 144, 202, 249);
+      default:
+        return Colors.white;
+    }
+  }
+}
+
+class detailsText extends StatelessWidget {
+  final String title;
+  final String detail;
+  final Color? color;
+
+  const detailsText(
+      {super.key, required this.title, required this.detail, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 40, right: 40, bottom: 5),
+      child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16, bottom: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(
-                      height: 23,
-                    ),
-                    Text(
-                      Utils.capitalize(pokemonDetailEntity.name.toString()),
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Text(
-                      pokemonDetailEntity.speciesTypes
-                          .map((t) => Utils.capitalize(t))
-                          .join(', '),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                      ),
-                    )
-                  ],
-                ),
-                Text(
-                  '#${pokemonDetailEntity.id.toString()}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                )
-              ],
-            ),
-          ),
-          Stack(
-            alignment: Alignment.bottomRight,
+          const Divider(color: Color.fromARGB(255, 184, 184, 184)),
+          Row(
             children: [
-              Image.asset(
-                ImageConstants.pokemonBgIcon,
-                height: 176,
-              ),
-              Image.network(
-                pokemonDetailEntity.imageUrl,
-                height: 125,
-                width: 136,
-              ),
+              Text(title),
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.only(right: 120),
+                child: Container(
+                  width: 110,
+                  height: 40,
+                  color: color ?? Colors.white,
+                  child: Center(
+                    child: Text(
+                      detail,
+                      style:
+                          TextStyle(color: color != null ? Colors.white : null),
+                    ),
+                  ),
+                ),
+              )
             ],
-          )
+          ),
         ],
       ),
     );

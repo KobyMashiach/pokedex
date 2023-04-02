@@ -4,7 +4,6 @@ import 'package:compile_project/constants/color_constants.dart';
 import 'package:compile_project/presentation/injector.dart';
 import 'package:compile_project/presentation/pages/home/home_screen.dart';
 import 'package:compile_project/presentation/pages/pokemon_detail/pokemon_detail_screen.dart';
-import 'package:compile_project/presentation/pages/splash/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +31,7 @@ class MyApp extends StatelessWidget {
         primaryColor: Color.fromARGB(255, 168, 18, 18),
       ),
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
+      home: const HomeScreen(),
       onGenerateRoute: (RouteSettings settings) {
         if (settings.name == 'pokemonDetail') {
           final Map<String, dynamic> value =
