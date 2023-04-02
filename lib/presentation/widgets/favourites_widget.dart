@@ -15,6 +15,7 @@ class SelectedPokemos extends ConsumerStatefulWidget {
 class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
   late TextEditingController _searchController;
   String _searchTerm = '';
+  bool searchInPage = false;
 
   @override
   void initState() {
@@ -34,19 +35,21 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
   }
 
   Widget _buildSearchBox() {
-    return TextField(
-      controller: _searchController,
-      onChanged: (value) {
-        setState(() {
-          _searchTerm = value;
-        });
-      },
-      decoration: const InputDecoration(
-        hintText: 'חפש פוקימון',
-        border: OutlineInputBorder(),
-        icon: Icon(Icons.search),
-      ),
-    );
+    return searchInPage
+        ? TextField(
+            controller: _searchController,
+            onChanged: (value) {
+              setState(() {
+                _searchTerm = value;
+              });
+            },
+            decoration: const InputDecoration(
+              hintText: 'חפש פוקימון',
+              border: OutlineInputBorder(),
+              icon: Icon(Icons.search),
+            ),
+          )
+        : const SizedBox();
   }
 
   @override
@@ -61,12 +64,18 @@ class _FavouritesWidgetState extends ConsumerState<SelectedPokemos> {
       return Scaffold(
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {},
-          icon: Icon(
-            Icons.search,
-            color: Colors.black,
-          ),
-          label: Text("חפש בפוקימונים שלך"),
+          onPressed: () {
+            setState(() {
+              searchInPage = !searchInPage;
+            });
+          },
+          icon: !searchInPage
+              ? Icon(
+                  Icons.search,
+                )
+              : Icon(Icons.search_off),
+          label:
+              !searchInPage ? Text("חפש בפוקימונים שלך") : Text("צא מהחיפוש"),
         ),
         body: Column(
           children: [

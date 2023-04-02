@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
         // fontFamily: 'NotoSans-Regular',
         primaryColor: Color.fromARGB(255, 168, 18, 18),
       ),
+      debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
       onGenerateRoute: (RouteSettings settings) {
         if (settings.name == 'pokemonDetail') {
