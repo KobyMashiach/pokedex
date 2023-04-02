@@ -33,7 +33,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           centerTitle: true,
           title: const HomeScreenAppBarTitle(),
         ),
-        body: const AllPokemonWidget(),
+        body: const SelectedPokemos(),
 
         // const TabBarView(
         //   children: [
