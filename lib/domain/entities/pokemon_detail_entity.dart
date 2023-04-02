@@ -9,11 +9,11 @@ class PokemonDetailEntity extends Equatable {
   final int height;
   final int weight;
   final double bmi;
-  final BaseStatEntity baseStat;
+  final BaseStatEntity? baseStat;
   final bool isFavourite;
 
   const PokemonDetailEntity({
-    required this.baseStat,
+    this.baseStat,
     required this.bmi,
     required this.height,
     required this.imageUrl,
